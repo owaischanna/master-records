@@ -1,0 +1,676 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Basic global styles for Individual Record dashboard */
+html, body, #__next {
+  height: 100%;
+}
+body {
+  margin: 0;
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #eef3f8;
+  color: #111827;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+* {
+  box-sizing: border-box;
+}
+
+.ir-app {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  min-height: 100vh;
+}
+.ir-sidebar {
+  background: linear-gradient(180deg, #0f3f47 0%, #0b2b32 100%);
+  color: #f8fafc;
+  padding: 34px 26px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.ir-logo {
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  margin-bottom: 18px;
+  line-height: 1.1;
+}
+.ir-sidebar-footer {
+  margin-top: 32px;
+  font-size: 13px;
+  color: rgba(248,250,252,0.65);
+}
+.ir-sidebar::before {
+  content: '';
+  display: block;
+  width: 48px;
+  height: 3px;
+  border-radius: 999px;
+  background: #22c55e;
+  margin-bottom: 18px;
+}
+.ir-main {
+  padding: 28px 32px;
+}
+
+.ir-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 26px;
+  gap: 18px;
+}
+.ir-header-left h2 {
+  margin: 0;
+  font-size: 32px;
+  letter-spacing: -0.03em;
+}
+.ir-sub {
+  margin: 8px 0 0 0;
+  color: #6b7280;
+  font-size: 15px;
+}
+
+.ir-page-content {
+  display: grid;
+  gap: 22px;
+}
+
+.ir-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 18px;
+}
+.ir-card {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  padding: 20px 22px;
+  border-radius: 22px;
+  border: 1px solid rgba(148,163,184,0.16);
+  box-shadow: 0 14px 32px rgba(15,23,42,0.08);
+}
+.ir-card-title {
+  color: #475569;
+  font-size: 13px;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.ir-card-value {
+  font-size: 32px;
+  font-weight: 800;
+  color: #0f172a;
+}
+.ir-card-accent {
+  width: 42px;
+  height: 5px;
+  border-radius: 999px;
+  background: #0f766e;
+  margin-top: 16px;
+}
+
+.ir-dashboard-card {
+  background: white;
+  border-radius: 24px;
+  border: 1px solid rgba(148,163,184,0.16);
+  padding: 24px;
+  box-shadow: 0 24px 50px rgba(15,23,42,0.08);
+}
+.ir-panel-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.ir-panel-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px;
+  background: rgba(14,165,233,0.14);
+  color: #0369a1;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  margin-bottom: 10px;
+}
+.ir-panel-top h3 {
+  margin: 0;
+  font-size: 24px;
+}
+.ir-panel-note {
+  margin: 8px 0 0 0;
+  color: #475569;
+  font-size: 15px;
+  max-width: 560px;
+}
+.ir-panel-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.ir-btn {
+  border: none;
+  border-radius: 14px;
+  padding: 12px 18px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+.ir-btn:hover {
+  transform: translateY(-1px);
+}
+.ir-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+.ir-btn-primary {
+  background: #0f766e;
+  color: white;
+  box-shadow: 0 14px 34px rgba(15,118,110,0.18);
+}
+.ir-btn-primary:hover {
+  background: #115e59;
+}
+.ir-btn-secondary {
+  background: #f8fafc;
+  color: #111827;
+  box-shadow: 0 10px 22px rgba(15,23,42,0.08);
+}
+
+.ir-search-panel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.ir-search {
+  flex: 1;
+  min-width: 240px;
+  max-width: 100%;
+  background: #f8fafc;
+  color: #111827;
+  border: 1px solid #e2e8f0;
+  padding: 14px 16px;
+  border-radius: 16px;
+  font-size: 15px;
+}
+.ir-search-lg {
+  width: 100%;
+}
+.ir-search-meta {
+  color: #475569;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.ir-table-wrap {
+  overflow-x: auto;
+  border-radius: 20px;
+  border: 1px solid rgba(148,163,184,0.16);
+}
+.ir-table-card {
+  background: #ffffff;
+}
+..ir-table {
+  width: 100%;
+  min-width: 0;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+.ir-th,
+.ir-td {
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(148,163,184,0.18);
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+.ir-th {
+  background: #f8fafc;
+  color: #0f172a;
+  font-size: 14px;
+  text-align: left;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+.ir-th-action,
+.ir-td-action {
+  text-align: right;
+}
+.ir-col-s {
+  width: 4.5rem;
+}
+.ir-col-beneficary-name {
+  width: 18rem;
+}
+.ir-col-cnic {
+  width: 10rem;
+}
+.ir-col-gender {
+  width: 6.5rem;
+}
+.ir-col-status {
+  width: 8rem;
+}
+.ir-col-total-received {
+  width: 9rem;
+}
+.ir-col-view {
+  width: 7rem;
+}
+.ir-row:nth-child(even) {
+  background: #ffffff;
+}
+.ir-row:hover {
+  background: #eef2ff;
+}
+.ir-td {
+  color: #334155;
+  font-size: 14px;
+  white-space: normal;
+}
+.ir-link-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #0f766e;
+  color: white;
+  padding: 8px 14px;
+  border-radius: 999px;
+  text-decoration: none;
+  transition: transform 0.2s ease, 
+  
+}
+.ir-link-button:hover {
+  background: #115e59;
+}
+.ir-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 5px 11px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.ir-pill-on-grid {
+  background: rgba(16,185,129,0.12);
+  color: #047857;
+}
+.ir-pill-off-grid {
+  background: rgba(29,78,216,0.12);
+  color: #1d4ed8;
+}
+.ir-pill-eligible {
+  background: rgba(34,197,94,0.12);
+  color: #15803d;
+}
+.ir-pill-not-eligible {
+  background: rgba(239,68,68,0.12);
+  color: #b91c1c;
+}
+.ir-pill-yes {
+  background: rgba(34,197,94,0.12);
+  color: #15803d;
+}
+.ir-pill-no {
+  background: rgba(249,115,22,0.12);
+  color: #c2410c;
+}
+.ir-pill-unassigned {
+  background: rgba(226,232,240,0.22);
+  color: #475569;
+}
+.ir-sort-indicator {
+  opacity: 0.7;
+  margin-left: 6px;
+}
+.ir-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 22px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.ir-footer-spread {
+  justify-content: space-between;
+}
+.ir-footer-info {
+  color: #475569;
+  font-size: 14px;
+}
+.ir-pagination {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.ir-page {
+  font-weight: 700;
+  color: #111827;
+}
+.ir-empty-state {
+  padding: 60px 0;
+  text-align: center;
+  color: #64748b;
+}
+
+.ir-record-page {
+  padding: 24px 32px;
+  max-width: 1320px;
+  margin: 0 auto;
+}
+.ir-record-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 28px;
+  padding: 24px 26px;
+  background: rgba(255,255,255,0.98);
+  border-radius: 24px;
+  border: 1px solid rgba(148,163,184,0.15);
+  box-shadow: 0 18px 40px rgba(15,23,42,0.05);
+}
+.ir-record-overview-card,
+.ir-record-details-card,
+.ir-record-empty-card {
+  background: #ffffff;
+  border: 1px solid rgba(148,163,184,0.18);
+  border-radius: 26px;
+  box-shadow: 0 20px 45px rgba(15,23,42,0.08);
+  padding: 28px;
+  margin-bottom: 26px;
+}
+.ir-record-overview-card {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  gap: 28px;
+  align-items: center;
+}
+.ir-record-overview-text h3 {
+  margin: 12px 0 8px;
+  font-size: 32px;
+  line-height: 1.05;
+  color: #0f172a;
+}
+.ir-record-overview-note {
+  margin: 0;
+  color: #475569;
+  font-size: 15px;
+  max-width: 680px;
+}
+.ir-record-overview-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.ir-record-summary-item {
+  background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+  border-radius: 20px;
+  padding: 20px 22px;
+  border: 1px solid rgba(15,118,110,0.12);
+}
+.ir-record-summary-label {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #475569;
+  margin-bottom: 10px;
+}
+.ir-record-summary-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+}
+.ir-record-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  gap: 18px;
+}
+.ir-record-section-header h4 {
+  margin: 0;
+  font-size: 22px;
+  color: #0f172a;
+}
+.ir-record-section-header p {
+  margin: 6px 0 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+.ir-record-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(260px, 1fr));
+  gap: 20px;
+}
+.ir-record-field {
+  background: #f8fbff;
+  border: 1px solid rgba(148,163,184,0.16);
+  border-radius: 20px;
+  padding: 20px 22px;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.ir-record-field-large {
+  min-height: 130px;
+}
+.ir-record-label {
+  color: #475569;
+  font-size: 13px;
+  margin-bottom: 8px;
+  letter-spacing: 0.04em;
+  text-transform: capitalize;
+}
+.ir-record-value {
+  color: #111827;
+  font-size: 16px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+.ir-record-empty-card {
+  text-align: center;
+}
+.ir-record-empty-card h3 {
+  margin: 0 0 12px;
+  font-size: 24px;
+}
+.ir-record-empty-card p {
+  margin: 0 0 18px;
+  color: #64748b;
+  font-size: 15px;
+}
+
+@media (max-width: 1050px) {
+  .ir-record-overview-card {
+    grid-template-columns: 1fr;
+  }
+  .ir-record-grid {
+    grid-template-columns: repeat(2, minmax(220px, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .ir-record-page {
+    padding: 20px 20px;
+  }
+  .ir-record-header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 20px;
+  }
+  .ir-record-overview-summary {
+    grid-template-columns: 1fr;
+  }
+  .ir-record-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 650px) {
+  .ir-record-header {
+    gap: 14px;
+  }
+  .ir-record-overview-card,
+  .ir-record-details-card,
+  .ir-record-empty-card {
+    padding: 22px;
+  }
+  .ir-record-summary-item {
+    padding: 18px 18px;
+  }
+}
+
+@media (max-width: 1280px) {
+  .ir-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1100px) {
+  .ir-col-business-investment-plan-nano-business,
+  .ir-col-union-council,
+  .ir-col-village-name-parro {
+    display: none;
+  }
+}
+
+@media (max-width: 980px) {
+  .ir-col-cnic,
+  .ir-col-gender,
+  .ir-col-remaining-amount {
+    display: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .ir-app {
+    grid-template-columns: 1fr;
+  }
+  .ir-sidebar {
+    width: 100%;
+    padding: 20px;
+  }
+  .ir-main {
+    padding: 20px;
+  }
+  .ir-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .ir-panel-top {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .ir-panel-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .ir-search-panel {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .ir-search-meta {
+    margin-top: 12px;
+  }
+}
+
+@media (max-width: 760px) {
+  .ir-stats {
+    grid-template-columns: 1fr;
+  }
+  .ir-panel-top,
+  .ir-search-panel,
+  .ir-footer {
+    gap: 14px;
+  }
+  .ir-table-wrap {
+    overflow-x: hidden;
+  }
+  .ir-table {
+    display: block;
+  }
+  .ir-table thead {
+    display: none;
+  }
+  .ir-row {
+    display: block;
+    margin-bottom: 18px;
+    border: 1px solid rgba(148,163,184,0.18);
+    border-radius: 22px;
+    background: #ffffff;
+  }
+  .ir-row:nth-child(even) {
+    background: #ffffff;
+  }
+  .ir-td {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(148,163,184,0.18);
+  }
+  .ir-td:last-child {
+    border-bottom: none;
+  }
+  .ir-td::before {
+    content: attr(data-label);
+    color: #475569;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    display: block;
+  }
+  .ir-td-action {
+    width: 100%;
+    align-items: flex-end;
+  }
+  .ir-td-action::before {
+    content: none;
+  }
+  .ir-col-cnic,
+  .ir-col-gender,
+  .ir-col-village-name-parro,
+  .ir-col-union-council,
+  .ir-col-business-investment-plan-nano-business,
+  .ir-col-trade,
+  .ir-col-status,
+  .ir-col-remaining-amount {
+    display: none;
+  }
+  .ir-td {
+    white-space: normal;
+  }
+}
+
+@media (max-width: 560px) {
+  .ir-btn,
+  .ir-search {
+    width: 100%;
+  }
+  .ir-panel-actions,
+  .ir-search-panel,
+  .ir-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .ir-row {
+    border-radius: 18px;
+  }
+}
+
