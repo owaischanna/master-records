@@ -40,7 +40,6 @@ export default function MonthlyReportModal({ isOpen, onClose, record, sheetName,
   });
 
   const [formData, setFormData] = useState(getInitialForm());
-
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
@@ -71,7 +70,7 @@ export default function MonthlyReportModal({ isOpen, onClose, record, sheetName,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           sheetName,
-          id: formData['S.#'] || record?.['S.#'],
+          id: rowId,
           updates: formData
         })
       });
@@ -79,11 +78,16 @@ export default function MonthlyReportModal({ isOpen, onClose, record, sheetName,
       const result = await response.json();
 
       if (response.ok) {
-        const successMessage = `Saved changes for ${formData['Beneficary Name'] || formData['Beneficiary Name'] || 'record'} (S.# ${rowId})`;
-        setMessage('✓ Record updated successfully!');
+        const successMessage = `Saved changes for ${formData['Beneficary Name'] || 'record'} (S.# ${rowId})`;
+        setMessage('✓ Record updated successfully! Reloading page...');
+        
+        // Trigger parent callback if it exists
         if (onSave) onSave(successMessage, 'success');
+        
+        // Wait 1.2 seconds for user to read success message, then close modal and reload page
         setTimeout(() => {
           onClose();
+          window.location.reload(); 
         }, 1200);
       } else {
         setMessage('✗ Error: ' + result.message);
@@ -98,7 +102,6 @@ export default function MonthlyReportModal({ isOpen, onClose, record, sheetName,
 
   if (!isOpen) return null;
 
-  const name = (record?.['Beneficary Name'] ?? record?.['Beneficiary Name'] ?? record?.['Full Name'] ?? formData['Beneficary Name']) || 'Unknown';
   const cnic = (record?.['CNIC'] ?? record?.['CNIC Number'] ?? formData['CNIC Number']) || 'N/A';
   const title = mode === 'new' ? 'Add New Monthly Record' : 'Update Monthly Record';
 
