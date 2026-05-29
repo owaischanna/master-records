@@ -5,8 +5,9 @@ import StatsCards from '../components/StatsCards';
 import Dashboard from '../components/Dashboard';
 import MonthlyReports from '../components/Monthlyreport';
 import { getUserFromToken, logout } from '../utils/auth';
+import { getSupabase, getSupabaseTableName, mapReportRow } from '../utils/supabaseServer';
 
-export default function Home({ data }) {
+export default function Home({ data = [] }) {
   const [activeItem, setActiveItem] = useState('Dashboard');
   const [user, setUser] = useState(null);
   const router = useRouter();
@@ -16,9 +17,25 @@ export default function Home({ data }) {
   }, []);
 
   const total = data.length;
-  const totalReceived = data.reduce((sum, row) => sum + (Number(row['Total Received'] ?? row['Total Received '] ?? 0) || 0), 0);
-  const totalDue = data.reduce((sum, row) => sum + (Number(row['Total Due Amount'] ?? row['Total Due Amount '] ?? 0) || 0), 0);
-  const avgRecovery = total > 0 ? `${(data.reduce((sum, row) => sum + (Number(row['Recovery %'] ?? row['Recovery % '] ?? 0) || 0), 0) / total * 100).toFixed(1)}%` : '0%';
+
+  // 🟢 FIXED: Internal number parsing block avoids NaN when reading formatted string keys
+  const parseStrNum = (val) => {
+    if (val === null || val === undefined) return 0;
+    const clean = String(val).replace(/[\,RsPKR\s]/g, '');
+    return isNaN(Number(clean)) ? 0 : Number(clean);
+  };
+
+  const totalReceived = data.reduce((sum, row) => {
+    return sum + parseStrNum(row['Total Received'] ?? row['total_received'] ?? row['Total Received ']);
+  }, 0);
+
+  const totalDue = data.reduce((sum, row) => {
+    return sum + parseStrNum(row['Total Due Amount'] ?? row['total_due_amount'] ?? row['Total Due Amount '] ?? row['Remaining Amount'] ?? row['remaining_amount']);
+  }, 0);
+
+  const avgRecovery = totalReceived + totalDue > 0 
+    ? `${((totalReceived / (totalReceived + totalDue)) * 100).toFixed(1)}%` 
+    : '0.0%';
 
   const stats = {
     total,
@@ -78,15 +95,30 @@ export default function Home({ data }) {
 }
 
 export async function getServerSideProps() {
-  const fs = require('fs');
-  const path = require('path');
-  const dataPath = path.join(process.cwd(), 'data', 'data.json');
+  const supabase = getSupabase();
   let data = [];
-  try {
-    const raw = fs.readFileSync(dataPath, 'utf8');
-    data = JSON.parse(raw);
-  } catch (e) {
-    console.warn('No data.json found, using empty array');
+
+  if (supabase) {
+    const tableName = getSupabaseTableName() || 'individual_records';
+    console.log(`[Supabase] Loading data from table: ${tableName}`);
+    const { data: rows, error } = await supabase.from(tableName).select('*');
+    if (error) {
+      console.error('Error fetching dashboard data from Supabase:', error);
+    } else if (rows) {
+      data = rows.map(mapReportRow);
+    }
+  } else {
+    const fs = require('fs');
+    const path = require('path');
+    const dataPath = path.join(process.cwd(), 'data', 'data.json');
+    try {
+      if (fs.existsSync(dataPath)) {
+        const raw = fs.readFileSync(dataPath, 'utf8');
+        data = JSON.parse(raw);
+      }
+    } catch (e) {
+      console.warn('Fallback data loading failed');
+    }
   }
 
   return { props: { data } };
