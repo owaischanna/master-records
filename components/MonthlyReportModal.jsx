@@ -52,54 +52,100 @@ export default function MonthlyReportModal({ isOpen, onClose, record, sheetName,
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   setLoading(true);
+  //   setMessage('');
+
+  //   const rowId = formData['S.#'] ?? record?.['S.#'];
+  //   if (!rowId) {
+  //     setMessage('✗ Please enter S.# before saving.');
+  //     setLoading(false);
+  //     return;
+  //   }
+
+  //   try {
+  //     const response = await fetch('/api/update-monthly-report', {
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: JSON.stringify({
+  //         sheetName,
+  //         id: rowId,
+  //         updates: formData
+  //       })
+  //     });
+
+  //     const result = await response.json();
+
+  //     if (response.ok) {
+  //       const successMessage = `Saved changes for ${formData['Beneficary Name'] || 'record'} (S.# ${rowId})`;
+  //       setMessage('✓ Record updated successfully! Reloading page...');
+        
+  //       // Trigger parent callback if it exists
+  //       if (onSave) onSave(successMessage, 'success');
+        
+  //       // Wait 1.2 seconds for user to read success message, then close modal and reload page
+  //       setTimeout(() => {
+  //         onClose();
+  //         window.location.reload(); 
+  //       }, 1200);
+  //     } else {
+  //       setMessage('✗ Error: ' + result.message);
+  //     }
+  //   } catch (error) {
+  //     setMessage('✗ Failed to update record');
+  //     console.error(error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setMessage('');
+  e.preventDefault();
+  setLoading(true);
+  setMessage('');
 
-    const rowId = formData['S.#'] ?? record?.['S.#'];
-    if (!rowId) {
-      setMessage('✗ Please enter S.# before saving.');
-      setLoading(false);
-      return;
+  const rowId = formData['S.#'] ?? record?.['S.#'] ?? record?.s_no ?? record?.s;
+
+  if (mode !== 'new' && !rowId) {
+    setMessage('✗ Please enter S.# before saving.');
+    setLoading(false);
+    return;
+  }
+
+  try {
+    const response = await fetch('/api/update-monthly-report', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sheetName,       // table name e.g. "August_2026"
+        id: rowId,       // s_no for matching the row
+        updates: formData,
+        mode,            // 'new' or 'edit' — this was missing before!
+      }),
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+      const successMessage = `${mode === 'new' ? 'Created' : 'Updated'} record for ${formData['Beneficary Name'] || 'beneficiary'} (S.# ${rowId})`;
+      setMessage(`✓ ${mode === 'new' ? 'Record created' : 'Record updated'} successfully! Reloading...`);
+      if (onSave) onSave(successMessage, 'success');
+      setTimeout(() => {
+        onClose();
+        window.location.reload();
+      }, 1200);
+    } else {
+      console.error('Save failed:', result);
+      setMessage('✗ Error: ' + (result.message || 'Unknown error'));
     }
-
-    try {
-      const response = await fetch('/api/update-monthly-report', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sheetName,
-          id: rowId,
-          updates: formData
-        })
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        const successMessage = `Saved changes for ${formData['Beneficary Name'] || 'record'} (S.# ${rowId})`;
-        setMessage('✓ Record updated successfully! Reloading page...');
-        
-        // Trigger parent callback if it exists
-        if (onSave) onSave(successMessage, 'success');
-        
-        // Wait 1.2 seconds for user to read success message, then close modal and reload page
-        setTimeout(() => {
-          onClose();
-          window.location.reload(); 
-        }, 1200);
-      } else {
-        setMessage('✗ Error: ' + result.message);
-      }
-    } catch (error) {
-      setMessage('✗ Failed to update record');
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  } catch (error) {
+    console.error('Network error:', error);
+    setMessage('✗ Network error — check your connection');
+  } finally {
+    setLoading(false);
+  }
+};
   if (!isOpen) return null;
 
   const cnic = (record?.['CNIC'] ?? record?.['CNIC Number'] ?? formData['CNIC Number']) || 'N/A';
