@@ -131,38 +131,36 @@
 //   }
 // }
 
-
-
-import { getSupabase, normalizeReportPayload } from '../../utils/supabaseServer';
+import { getSupabase, mapReportRow, normalizeReportPayload } from '../../utils/supabaseServer';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
   }
 
-  const supabase = getSupabase();
-  if (!supabase) {
-    return res.status(500).json({ message: 'Supabase not configured. Check your environment variables.' });
-  }
-
   const { sheetName, id, updates, mode } = req.body || {};
 
-  if (!updates) {
-    return res.status(400).json({ message: 'Missing updates payload' });
+  if (!sheetName || !updates) {
+    return res.status(400).json({ message: 'Missing sheetName or updates' });
   }
 
-  // Determine which table to write to
-  const tableName = sheetName || process.env.SUPABASE_TABLE_NAME || 'individual_records';
+  const supabase = getSupabase();
+  if (!supabase) {
+    return res.status(500).json({ message: 'Supabase not configured. Check SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY on Vercel.' });
+  }
 
-  // Normalize the payload to match your Supabase column names
+  const tableName = String(sheetName).trim().replace(/[^A-Za-z0-9_]/g, '');
+  if (!tableName) {
+    return res.status(400).json({ message: 'Invalid table name' });
+  }
+
   const payload = normalizeReportPayload(updates, null);
 
-  console.log(`[update-monthly-report] table=${tableName} mode=${mode || 'edit'} id=${id}`);
-  console.log(`[update-monthly-report] payload=`, payload);
+  console.log(`[update-monthly-report] table=${tableName} mode=${mode} id=${id}`);
+  console.log(`[update-monthly-report] payload=`, JSON.stringify(payload));
 
   try {
     if (mode === 'new') {
-      // ── INSERT new record ──────────────────────────────────────
       const { data, error } = await supabase
         .from(tableName)
         .insert([payload])
@@ -173,45 +171,70 @@ export default async function handler(req, res) {
         return res.status(400).json({ message: error.message, details: error });
       }
 
-      return res.status(200).json({ message: 'Record created successfully', data });
+      return res.status(200).json({
+        message: 'Record created successfully',
+        data: data?.[0] ? mapReportRow(data[0]) : data,
+      });
 
     } else {
-      // ── UPDATE existing record ─────────────────────────────────
       if (!id) {
-        return res.status(400).json({ message: 'Missing record ID (S.#) for update' });
+        return res.status(400).json({ message: 'Missing record ID for update' });
       }
 
-      // Try updating by s_no first, fall back to id column
-      const { data, error } = await supabase
+      const identifier = String(id).trim();
+
+      // Try s_no first
+      let { data, error } = await supabase
         .from(tableName)
         .update(payload)
-        .eq('s_no', String(id))
+        .eq('s_no', identifier)
         .select();
 
       if (error) {
-        console.error('[Supabase update error]', error);
+        console.error('[Supabase update s_no error]', error);
         return res.status(400).json({ message: error.message, details: error });
       }
 
-      // If no rows were updated, the s_no might be stored differently
+      // No rows matched s_no — try 's' column
       if (!data || data.length === 0) {
-        console.warn(`[update-monthly-report] No rows matched s_no=${id}, trying 's' column`);
-
-        const { data: data2, error: error2 } = await supabase
+        console.warn(`No rows matched s_no="${identifier}", trying "s" column`);
+        const result2 = await supabase
           .from(tableName)
           .update(payload)
-          .eq('s', String(id))
+          .eq('s', identifier)
           .select();
 
-        if (error2) {
-          console.error('[Supabase update fallback error]', error2);
-          return res.status(400).json({ message: error2.message });
+        if (result2.error) {
+          console.error('[Supabase update s error]', result2.error);
+          return res.status(400).json({ message: result2.error.message, details: result2.error });
         }
 
-        return res.status(200).json({ message: 'Record updated successfully', data: data2 });
+        data = result2.data;
       }
 
-      return res.status(200).json({ message: 'Record updated successfully', data });
+      // Still no rows — insert as new
+      if (!data || data.length === 0) {
+        console.warn(`Row not found by id="${identifier}", inserting as new`);
+        const { data: inserted, error: insertError } = await supabase
+          .from(tableName)
+          .insert([payload])
+          .select();
+
+        if (insertError) {
+          console.error('[Supabase insert fallback error]', insertError);
+          return res.status(400).json({ message: insertError.message, details: insertError });
+        }
+
+        return res.status(200).json({
+          message: 'Record inserted successfully',
+          data: inserted?.[0] ? mapReportRow(inserted[0]) : inserted,
+        });
+      }
+
+      return res.status(200).json({
+        message: 'Record updated successfully',
+        data: data?.[0] ? mapReportRow(data[0]) : data,
+      });
     }
 
   } catch (err) {
